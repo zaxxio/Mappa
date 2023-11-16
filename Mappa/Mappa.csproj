@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net7.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <PackageId>Test.Http.Client</PackageId>
+        <Authors>Partha Sutradhar</Authors>
+        <Company>OpenSource</Company>
+        <Description>The HttpManager package provides a robust solution for creating service clients that interface with RESTful web services. It supports a builder pattern to configure and instantiate service clients, ensuring that all necessary configurations are provided before the service is used.</Description>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageTags>HTTP Manager</PackageTags>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Castle.Core" Version="5.1.1"/>
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.3"/>
+        <None Include="README.md" Pack="true" PackagePath="\"/>
+    </ItemGroup>
+
+</Project>

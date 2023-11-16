@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "dgSpecHash": "dANH5mmBBV3To9OoyzGSKhXIIrz9oAtefFpGIwIWBb/6QAtymGaAe/OXqQO4Q8bIplCIPgS/QR0Euyz4aJK6GQ==",
+  "success": true,
+  "projectFilePath": "/Users/partha/RiderProjects/Mappa/Mappa/Mappa.csproj",
+  "expectedPackageFiles": [
+    "/Users/partha/.nuget/packages/castle.core/5.1.1/castle.core.5.1.1.nupkg.sha512",
+    "/Users/partha/.nuget/packages/newtonsoft.json/13.0.3/newtonsoft.json.13.0.3.nupkg.sha512",
+    "/Users/partha/.nuget/packages/system.diagnostics.eventlog/6.0.0/system.diagnostics.eventlog.6.0.0.nupkg.sha512"
+  ],
+  "logs": []
+}

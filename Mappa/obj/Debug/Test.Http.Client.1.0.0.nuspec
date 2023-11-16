@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+  <metadata>
+    <id>Test.Http.Client</id>
+    <version>1.0.0</version>
+    <authors>Partha Sutradhar</authors>
+    <license type="expression">MIT</license>
+    <licenseUrl>https://licenses.nuget.org/MIT</licenseUrl>
+    <readme>README.md</readme>
+    <description>The HttpManager package provides a robust solution for creating service clients that interface with RESTful web services. It supports a builder pattern to configure and instantiate service clients, ensuring that all necessary configurations are provided before the service is used.</description>
+    <tags>HTTP Manager</tags>
+    <dependencies>
+      <group targetFramework="net7.0">
+        <dependency id="Castle.Core" version="5.1.1" exclude="Build,Analyzers" />
+        <dependency id="Newtonsoft.Json" version="13.0.3" exclude="Build,Analyzers" />
+      </group>
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="/Users/partha/RiderProjects/Mappa/Mappa/bin/Debug/net7.0/Mappa.dll" target="lib/net7.0/Mappa.dll" />
+    <file src="/Users/partha/RiderProjects/Mappa/Mappa/README.md" target="/README.md" />
+  </files>
+</package>
