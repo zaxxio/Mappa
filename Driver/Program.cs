@@ -8,28 +8,30 @@ HttpManager httpManager = new HttpManager.Builder()
     .BaseUrl("https://jsonplaceholder.typicode.com")
     .Build();
 
-var userService =
-    httpManager.CreateService<IUserService>(); // this postService could be used later so do not lose instance 
+var postService =
+    httpManager.CreateService<IPostService>(); // this postService could be used later so do not lose instance 
 
-// User Service
-Task<ApiResponse<List<User>>> userListResponse = userService.FindAll();
-Task<ApiResponse<User>> userResponse = userService.FindById(1);
 
-ApiResponse<User> apiResponse = userResponse.Result;
-User payload = apiResponse.Payload;
-Debug.WriteLine(payload);
+Post p = new Post();
+p.Id = 1;
+p.Title = "Game";
+p.Body = "sbjhsdf";
+p.UserId = 1;
+
+var postListResponse = postService.RegisterUser(p);
+Console.WriteLine(postListResponse.Result.Content);
 
 // Post Service
-var postService = httpManager.CreateService<IPostService>();
-Task<ApiResponse<List<Comment>>> commentService = postService.FindById(1, "comments");
-Task<ApiResponse<List<Post>>> postListResponse = postService.FindByCommentsByPostId(1);
-ApiResponse<List<Post>> response = postListResponse.Result;
-
-foreach (Post post in response.Payload)
-{
-    Console.WriteLine("==================================================================");
-    Console.WriteLine(post);
-}
+// var postService = httpManager.CreateService<IPostService>();
+// Task<ApiResponse<List<Comment>>> commentService = postService.FindById(1, "comments");
+// Task<ApiResponse<List<Post>>> postListResponse = postService.FindByCommentsByPostId(1);
+// ApiResponse<List<Post>> response = postListResponse.Result;
+//
+// foreach (Post post in response.Payload)
+// {
+//     Console.WriteLine("==================================================================");
+//     Console.WriteLine(post);
+// }
 
 // ApiResponse<List<Comment>> serviceResult = commentService.Result;
 //

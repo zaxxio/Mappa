@@ -1,11 +1,11 @@
-/Users/partha/RiderProjects/Mappa/Mappa/bin/Debug/net7.0/Mappa.deps.json
-/Users/partha/RiderProjects/Mappa/Mappa/bin/Debug/net7.0/Mappa.dll
-/Users/partha/RiderProjects/Mappa/Mappa/bin/Debug/net7.0/Mappa.pdb
 /Users/partha/RiderProjects/Mappa/Mappa/obj/Debug/net7.0/Mappa.csproj.AssemblyReference.cache
 /Users/partha/RiderProjects/Mappa/Mappa/obj/Debug/net7.0/Mappa.GeneratedMSBuildEditorConfig.editorconfig
 /Users/partha/RiderProjects/Mappa/Mappa/obj/Debug/net7.0/Mappa.AssemblyInfoInputs.cache
 /Users/partha/RiderProjects/Mappa/Mappa/obj/Debug/net7.0/Mappa.AssemblyInfo.cs
 /Users/partha/RiderProjects/Mappa/Mappa/obj/Debug/net7.0/Mappa.csproj.CoreCompileInputs.cache
+/Users/partha/RiderProjects/Mappa/Mappa/bin/Debug/net7.0/Mappa.deps.json
+/Users/partha/RiderProjects/Mappa/Mappa/bin/Debug/net7.0/Mappa.dll
+/Users/partha/RiderProjects/Mappa/Mappa/bin/Debug/net7.0/Mappa.pdb
 /Users/partha/RiderProjects/Mappa/Mappa/obj/Debug/net7.0/Mappa.dll
 /Users/partha/RiderProjects/Mappa/Mappa/obj/Debug/net7.0/refint/Mappa.dll
 /Users/partha/RiderProjects/Mappa/Mappa/obj/Debug/net7.0/Mappa.pdb

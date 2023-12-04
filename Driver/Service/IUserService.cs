@@ -15,8 +15,4 @@ public interface IUserService
 
     [Route(path: "/users/{id}", MethodType.GET)]
     Task<ApiResponse<User>> FindById([PathParam("id")] int id);
-
-    [Route(path: "/users}", MethodType.GET)]
-    Task<ApiResponse<User>> SignUp([RequestBody] User user);
-
 }

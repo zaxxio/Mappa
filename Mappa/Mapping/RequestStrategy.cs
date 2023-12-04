@@ -7,6 +7,7 @@ using Mappa.Domain;
 using Mappa.Interceptor;
 using Mappa.Strategy;
 using Mappa.Streotype;
+using Mappa.Streotype.Body;
 using Mappa.Streotype.Path;
 using Mappa.Streotype.Query;
 using Mappa.Streotype.Route;
@@ -24,75 +25,37 @@ public class RequestStrategy : IHttpStrategy
     {
         _pathParams.Clear();
         _queryParams.Clear();
+
         try
         {
             RouteAttribute? customAttribute = invocation.Method.GetCustomAttribute<RouteAttribute>();
-            if (customAttribute != null && customAttribute.MethodType == MethodType.GET)
+            if (customAttribute != null)
             {
                 baseUrl += customAttribute.Path;
-                Console.WriteLine("BEFORE EXECUTION: BASE URL " + baseUrl);
-                ParameterInfo[] parameters = invocation.Method.GetParameters();
-
-                foreach (var parameter in parameters)
-                {
-                    PathParamAttribute? attribute = parameter.GetCustomAttribute<PathParamAttribute>();
-                    if (attribute != null)
-                    {
-                        _pathParams.Add(attribute.Id, invocation.Arguments[parameter.Position]);
-                        Console.WriteLine("VALUE: " + invocation.Arguments[parameter.Position]);
-                    }
-
-                    QueryParamAttribute? queryAttribute = parameter.GetCustomAttribute<QueryParamAttribute>();
-                    if (queryAttribute != null)
-                    {
-                        _queryParams.Add(queryAttribute.Id, invocation.Arguments[parameter.Position]);
-                    }
-                }
-
-                foreach (var pathEntry in _pathParams)
-                {
-                    Console.WriteLine("Key " + pathEntry.Key + " Value " + pathEntry.Value);
-                    baseUrl = baseUrl.Replace("{" + pathEntry.Key + "}", pathEntry.Value.ToString());
-                }
-
-                if (_queryParams.Count > 0)
-                {
-                    var query = HttpUtility.ParseQueryString(string.Empty);
-                    foreach (var queryEntry in _queryParams)
-                    {
-                        query[queryEntry.Key] = queryEntry.Value.ToString();
-                    }
-
-                    baseUrl += "?" + query.ToString();
-                }
-
-                // Extract Path, Query, Headers... [omitting this for brevity]
-
-                Console.WriteLine("AFTER EXECUTION: BASE URL " + baseUrl);
-
-                // Extract Path, Query, Headers... [omitting this for brevity]
 
                 using (HttpClient client = new HttpClient())
                 {
-                    Type returnType = invocation.Method.ReturnType;
-
-                    HttpResponseMessage response = await client.GetAsync(baseUrl);
-                    if (response.IsSuccessStatusCode)
+                    // Handling GET requests
+                    if (customAttribute.MethodType == MethodType.GET)
                     {
-                        string responseBody = await response.Content.ReadAsStringAsync();
-                        Type payloadType =
-                            returnType.GetGenericArguments()[0]; // This should give you ApiResponse<List<User>>
-                        Type actualPayloadType =
-                            payloadType.GetGenericArguments()[0]; // This should give you List<User>
+                        ExtractParameters(invocation, _pathParams, _queryParams);
+                        AppendPathAndQueryParameters(ref baseUrl, _pathParams, _queryParams);
+                        HttpResponseMessage response = await client.GetAsync(baseUrl);
+                        // Process GET response
+                        await ProcessResponseAsync(invocation, response);
+                    }
+                    // Handling POST requests
+                    else if (customAttribute.MethodType == MethodType.POST)
+                    {
+                        ExtractParameters(invocation, _pathParams, _queryParams);
+                        AppendPathAndQueryParameters(ref baseUrl, _pathParams, _queryParams);
+                        Object requestBody = ExtractRequestBody(invocation);
+                        var jsonContent = new StringContent(JsonConvert.SerializeObject(requestBody), Encoding.UTF8,
+                            "application/json");
 
-                        var deserializedPayload = JsonConvert.DeserializeObject(responseBody, actualPayloadType);
-
-                        Type genericApiResponse = typeof(ApiResponse<>).MakeGenericType(actualPayloadType);
-                        dynamic apiResponse = Activator.CreateInstance(genericApiResponse);
-                        apiResponse.IsSuccess = response.IsSuccessStatusCode;
-                        apiResponse.Content = deserializedPayload;
-
-                        invocation.ReturnValue = Task.FromResult(apiResponse);
+                        HttpResponseMessage response = await client.PostAsync(baseUrl, jsonContent);
+                        // Process POST response
+                        await ProcessResponseAsync(invocation, response);
                     }
                 }
             }
@@ -100,105 +63,92 @@ public class RequestStrategy : IHttpStrategy
         catch (Exception ex)
         {
             Debug.WriteLine(ex);
-            // Consider how to handle this exception or propagate it further...
+            throw;
         }
     }
 
     public void Handle(IInvocation invocation, string baseUrl, List<PreFilter> preFilters, List<PostFilter> postFilters)
     {
-        _pathParams.Clear();
-        _queryParams.Clear();
-        try
+    }
+
+    private void ExtractParameters(IInvocation invocation, Dictionary<string, object> pathParams,
+        Dictionary<string, object> queryParams)
+    {
+        ParameterInfo[] parameters = invocation.Method.GetParameters();
+        foreach (var parameter in parameters)
         {
-            RouteAttribute? customAttribute = invocation.Method.GetCustomAttribute<RouteAttribute>();
-            if (customAttribute != null && customAttribute.MethodType == MethodType.GET)
+            PathParamAttribute? pathAttribute = parameter.GetCustomAttribute<PathParamAttribute>();
+            if (pathAttribute != null)
             {
-                baseUrl += customAttribute.Path;
-                Console.WriteLine("BEFORE EXECUTION: BASE URL " + baseUrl);
-                ParameterInfo[] parameters = invocation.Method.GetParameters();
-
-                foreach (var parameter in parameters)
-                {
-                    PathParamAttribute? attribute = parameter.GetCustomAttribute<PathParamAttribute>();
-                    if (attribute != null)
-                    {
-                        _pathParams.Add(attribute.Id, invocation.Arguments[parameter.Position]);
-                        Console.WriteLine("VALUE: " + invocation.Arguments[parameter.Position]);
-                    }
-
-                    QueryParamAttribute? queryAttribute = parameter.GetCustomAttribute<QueryParamAttribute>();
-                    if (queryAttribute != null)
-                    {
-                        _queryParams.Add(queryAttribute.Id, invocation.Arguments[parameter.Position]);
-                    }
-                }
-
-                foreach (var pathEntry in _pathParams)
-                {
-                    Console.WriteLine("Key " + pathEntry.Key + " Value " + pathEntry.Value);
-                    baseUrl = baseUrl.Replace("{" + pathEntry.Key + "}", pathEntry.Value.ToString());
-                }
-
-                if (_queryParams.Count > 0)
-                {
-                    var query = HttpUtility.ParseQueryString(string.Empty);
-                    foreach (var queryEntry in _queryParams)
-                    {
-                        query[queryEntry.Key] = queryEntry.Value.ToString();
-                    }
-
-                    baseUrl += "?" + query.ToString();
-                }
-
-                // Extract Path, Query, Headers... [omitting this for brevity]
-
-                Console.WriteLine("AFTER EXECUTION: BASE URL " + baseUrl);
-
-
-                using (HttpClient client = new HttpClient())
-                {
-                    Type returnType = invocation.Method.ReturnType;
-
-                    HttpResponseMessage response = client.GetAsync(baseUrl).Result; // Synchronous call
-                    if (response.IsSuccessStatusCode)
-                    {
-                        string responseBody = response.Content.ReadAsStringAsync().Result; // Synchronous call
-                        Type payloadType =
-                            returnType.GetGenericArguments()[0]; // This should give you ApiResponse<List<User>>
-                        Type actualPayloadType =
-                            payloadType.GetGenericArguments()[0]; // This should give you List<User>
-
-                        var deserializedPayload = JsonConvert.DeserializeObject(responseBody, actualPayloadType);
-
-                        Console.WriteLine(deserializedPayload);
-
-                        Type genericApiResponse = typeof(ApiResponse<>).MakeGenericType(actualPayloadType);
-                        dynamic apiResponse = Activator.CreateInstance(genericApiResponse);
-
-
-                        apiResponse.IsSuccess = response.IsSuccessStatusCode;
-                        apiResponse.Content = deserializedPayload;
-
-                        invocation.ReturnValue = apiResponse; // No longer a Task
-                    }
-                }
+                pathParams.Add(pathAttribute.Id, invocation.Arguments[parameter.Position]);
             }
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine(ex);
-            // Handle the exception or rethrow it as needed
-            throw;
+
+            QueryParamAttribute? queryAttribute = parameter.GetCustomAttribute<QueryParamAttribute>();
+            if (queryAttribute != null)
+            {
+                queryParams.Add(queryAttribute.Id, invocation.Arguments[parameter.Position]);
+            }
         }
     }
 
-
-    public object CreateGenericApiResponse(Type typeOfT)
+    private void AppendPathAndQueryParameters(ref string baseUrl, Dictionary<string, object> pathParams,
+        Dictionary<string, object> queryParams)
     {
-        // Construct the generic type ApiResponse<T>
-        Type genericType = typeof(ApiResponse<>).MakeGenericType(typeOfT);
+        foreach (var pathEntry in pathParams)
+        {
+            baseUrl = baseUrl.Replace("{" + pathEntry.Key + "}", pathEntry.Value.ToString());
+        }
 
-        // Create an instance of ApiResponse<T>
-        return Activator.CreateInstance(genericType);
+        if (queryParams.Count > 0)
+        {
+            var query = HttpUtility.ParseQueryString(string.Empty);
+            foreach (var queryEntry in queryParams)
+            {
+                query[queryEntry.Key] = queryEntry.Value.ToString();
+            }
+
+            baseUrl += "?" + query.ToString();
+        }
+    }
+
+    private Object ExtractRequestBody(IInvocation invocation)
+    {
+        ParameterInfo[] parameters = invocation.Method.GetParameters();
+        for (int i = 0; i < parameters.Length; i++)
+        {
+            if (parameters[i].GetCustomAttribute<RequestBodyAttribute>() != null)
+            {
+                return invocation.Arguments[i];
+            }
+        }
+
+        return null; // Or throw an exception if a request body is mandatory
+    }
+
+
+    private async Task ProcessResponseAsync(IInvocation invocation, HttpResponseMessage response)
+    {
+        if (response.IsSuccessStatusCode)
+        {
+            string responseBody = await response.Content.ReadAsStringAsync();
+            Type returnType = invocation.Method.ReturnType;
+            Type payloadType = returnType.GetGenericArguments()[0]; // Assuming Task<ApiResponse<T>>
+            Type actualPayloadType =
+                payloadType.GetGenericArguments()[0]; // This should give you List<User>
+
+
+            var deserializedPayload = JsonConvert.DeserializeObject(responseBody, actualPayloadType);
+
+            Type genericApiResponse = typeof(ApiResponse<>).MakeGenericType(actualPayloadType);
+            dynamic apiResponse = Activator.CreateInstance(genericApiResponse);
+            apiResponse.IsSuccess = response.IsSuccessStatusCode;
+            apiResponse.Content = deserializedPayload;
+
+            invocation.ReturnValue = Task.FromResult(apiResponse);
+        }
+        else
+        {
+            // Handle non-successful response
+        }
     }
 }
