@@ -1,3 +1,4 @@
+Use cases of Route Annotations
 ```csharp
 [Api]
 public interface IPostService
