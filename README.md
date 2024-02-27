@@ -1,4 +1,4 @@
-Use cases of Route Annotations
+Use cases of Custom Route Annotations for Mapping
 ```csharp
 [Api]
 public interface IPostService
